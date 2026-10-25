@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -9,7 +11,7 @@ func main() {
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5173", // Standard Vite development port
+		AllowOrigins: "http://localhost:5173",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
@@ -17,6 +19,18 @@ func main() {
 		return c.JSON(fiber.Map{
 			"status":  "success",
 			"message": "hi guys backend is connecteddddddd",
+		})
+	})
+
+	app.Post("/api/login", func(c *fiber.Ctx) error {
+		payload := c.Body()
+		fmt.Println("API Gateway reached")
+		fmt.Println(payload)
+
+		return c.JSON(fiber.Map{
+			"status":  "success",
+			"message": "endpoint working successfully",
+			"payload": string(payload),
 		})
 	})
 
