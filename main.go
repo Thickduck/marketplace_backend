@@ -1,14 +1,30 @@
 package main
 
 import (
+	"backend/database"
+
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	app := fiber.New()
+
+	db, err := database.Connect()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "http://localhost:5173",
@@ -16,6 +32,12 @@ func main() {
 	}))
 
 	app.Get("/api/health", func(c *fiber.Ctx) error {
+		if err := db.Ping(); err != nil {
+			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+				"status":  "error",
+				"message": "database not available",
+			})
+		}
 		return c.JSON(fiber.Map{
 			"status":  "success",
 			"message": "hi guys backend is connecteddddddd",
@@ -31,6 +53,13 @@ func main() {
 			"status":  "success",
 			"message": "endpoint working successfully",
 			"payload": string(payload),
+		})
+	})
+
+	app.Post("/api/create", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"message": "create gateway reached",
+			"status":  "success",
 		})
 	})
 
